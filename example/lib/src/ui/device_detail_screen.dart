@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_reactive_ble_example/src/ble/ble_device_connector.dart';
@@ -13,19 +14,19 @@ class DeviceDetailScreen extends StatelessWidget {
       Consumer2<BleDeviceConnector, ConnectionStateUpdate>(
         builder: (_, deviceConnector, connectionStateUpdate, __) =>
             _DeviceDetail(
-          device: device,
-          connectionUpdate: connectionStateUpdate != null &&
-                  connectionStateUpdate.deviceId == device.id
-              ? connectionStateUpdate
-              : ConnectionStateUpdate(
-                  deviceId: device.id,
-                  connectionState: DeviceConnectionState.disconnected,
-                  failure: null,
-                ),
-          connect: deviceConnector.connect,
-          disconnect: deviceConnector.disconnect,
-          discoverServices: deviceConnector.discoverServices,
-        ),
+                device: device,
+                connectionUpdate: connectionStateUpdate != null &&
+                        connectionStateUpdate.deviceId == device.id
+                    ? connectionStateUpdate
+                    : ConnectionStateUpdate(
+                        deviceId: device.id,
+                        connectionState: DeviceConnectionState.disconnected,
+                        failure: null,
+                      ),
+                connect: deviceConnector.connect,
+                disconnect: deviceConnector.disconnect,
+                writeByte: deviceConnector.writeByte,
+                discoverServices: deviceConnector.discoverServices),
       );
 }
 
@@ -36,12 +37,14 @@ class _DeviceDetail extends StatelessWidget {
     @required this.connect,
     @required this.disconnect,
     @required this.discoverServices,
+    @required this.writeByte,
     Key key,
   })  : assert(device != null),
         assert(connectionUpdate != null),
         assert(connect != null),
         assert(disconnect != null),
         assert(discoverServices != null),
+        assert(writeByte != null),
         super(key: key);
 
   final DiscoveredDevice device;
@@ -49,6 +52,7 @@ class _DeviceDetail extends StatelessWidget {
   final void Function(String deviceId) connect;
   final void Function(String deviceId) disconnect;
   final void Function(String deviceId) discoverServices;
+  final void Function(String deviceId) writeByte;
 
   bool _deviceConnected() =>
       connectionUpdate.connectionState == DeviceConnectionState.connected;
@@ -109,7 +113,16 @@ class _DeviceDetail extends StatelessWidget {
                         onPressed: _deviceConnected()
                             ? () => discoverServices(device.id)
                             : null,
-                        child: const Text("Discover Services"),
+                        child: const Text("Services"),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ElevatedButton(
+                        onPressed: _deviceConnected()
+                            ? () => writeByte(device.id)
+                            : null,
+                        child: const Text("Toggle LED"),
                       ),
                     ),
                   ],

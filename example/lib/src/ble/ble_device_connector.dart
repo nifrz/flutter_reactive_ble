@@ -49,6 +49,17 @@ class BleDeviceConnector extends ReactiveState<ConnectionStateUpdate> {
         );
   }
 
+  Future<void> writeByte(String deviceId) async {
+    final characteristic = QualifiedCharacteristic(
+        serviceId: Uuid.parse("ffe0"),
+        characteristicId: Uuid.parse("ffe1"),
+        deviceId: deviceId);
+    List<int> _list = [41];
+    await _ble
+        .writeCharacteristicWithoutResponse(characteristic, value: _list)
+        .then((value) => print('data write'));
+  }
+
   Future<void> dispose() async {
     await _deviceConnectionController.close();
   }
